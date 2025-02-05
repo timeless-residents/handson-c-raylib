@@ -1,127 +1,114 @@
-# Mac環境でのRaylib開発ガイド
+# Raylib プロトタイプ集
 
-## 概要
-RaylibはC言語用のシンプルで使いやすいマルチプラットフォーム対応のゲーム開発ライブラリです。このガイドでは、Mac環境でのRaylib開発環境の構築方法とトラブルシューティングについて説明します。
+このリポジトリは、Raylibを使用した基本的なゲームプログラミングの例を集めたものです。
 
-## 基本的な環境構築
+## 必要環境
 
-### 1. Homebrewを使用したインストール
+- clang
+- raylib
+- ImageMagick (アセット処理用)
+- SoX (音声生成用)
+
+MacOSでの環境セットアップ:
 ```bash
-brew update
 brew install raylib
+brew install imagemagick
+brew install sox
 ```
 
-### 2. プロジェクトの作成
+## プロジェクト構造
+
+```
+.
+├── Makefile
+├── README.md
+├── prototype/
+│   ├── app01.c  # 基本的なウィンドウ表示
+│   ├── app02.c  # 図形描画
+│   ├── app03.c  # アニメーション
+│   ├── app04.c  # キーボード入力
+│   ├── app05.c  # マウス入力
+│   ├── app06.c  # 衝突判定
+│   ├── app07.c  # テクスチャ
+│   ├── app08.c  # サウンド
+│   ├── app09.c  # パーティクル
+│   └── app10.c  # シンプルなPongゲーム
+└── output/      # ビルド出力ディレクトリ
+```
+
+## ビルド方法
+
+特定のプログラムをビルド:
 ```bash
-mkdir raylib_test
-cd raylib_test
+make app01  # app01.cをビルド
 ```
 
-### 3. サンプルコード（main.c）
-```c
-#include "raylib.h"
-
-int main(void) {
-    InitWindow(800, 450, "Raylib Text Example");
-    SetTargetFPS(60);
-    
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        DrawText("Hello, Raylib!", 10, 10, 20, BLACK);
-        EndDrawing();
-    }
-    
-    CloseWindow();
-    return 0;
-}
-```
-
-## コンパイル方法
-
-### 基本的なコンパイルコマンド
+すべてのプログラムをビルド:
 ```bash
-clang main.c -o text_app -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+make all
 ```
 
-## トラブルシューティング
-
-### 1. raylib.hが見つからない場合
-エラーメッセージ: `fatal error: 'raylib.h' file not found`
-
-解決方法:
-- インクルードパスの確認
+ビルド成果物の削除:
 ```bash
-ls /opt/homebrew/include/raylib.h
-```
-- 正しいパスを指定してコンパイル
-```bash
-clang main.c -o text_app -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+make clean
 ```
 
-### 2. アーキテクチャの不一致
-エラーメッセージ: `ignoring file [...] found architecture 'arm64', required architecture 'x86_64'`
+## アセット作成用ユーティリティ
 
-確認手順:
-```bash
-# システムアーキテクチャの確認
-uname -m
-
-# コンパイラの場所確認
-which clang
-```
-
-解決方法:
-1. PATHの一時的な修正
-```bash
-export PATH="/opt/homebrew/bin:/usr/bin:$PATH"
-```
-
-2. システムデフォルトのclangを使用してコンパイル
-```bash
-clang main.c -o text_app -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-```
+### 画像処理 (ImageMagick)
 
 ```bash
-clang prototype/app01.c -o output/app01 -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
-clang prototype/appXX.c -o output/appXX -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+# 画像サイズの変更
+convert input.png -resize 800x600 output.png
+
+# 幅のみ指定（高さは比率を保持）
+convert input.png -resize 800 output.png
+
+# 高さのみ指定（幅は比率を保持）
+convert input.png -resize x600 output.png
+
+# パーセンテージでリサイズ
+convert input.png -resize 50% output.png
 ```
 
-### 3. Terminal.appのアーキテクチャ設定
-Intel MacからApple Siliconに移行した場合:
-1. Terminal.appを終了
-2. Finderで「アプリケーション」→「ユーティリティ」→「Terminal」を右クリック
-3. 「情報を見る」を選択
-4. 「Rosettaを使用して開く」のチェックを外す
-5. Terminalを再起動
+### 音声生成 (SoX)
 
-## 実用的なテキスト表示例
+```bash
+# 基本的な効果音生成
+sox -n output.wav synth 1 sine 440        # 1秒のビープ音
+sox -n jump.wav synth 0.15 sine 300-1200  # ジャンプ音
+sox -n coin.wav synth 0.1 sine 900-2000   # コイン取得音
 
-### 1. スコア表示
-```c
-char scoreText[32];
-int score = 100;
-sprintf(scoreText, "Score: %d", score);
-DrawText(scoreText, 10, 10, 20, BLACK);
+# エフェクト付加
+sox input.wav output.wav echo 0.8 0.9 100 0.3  # エコー効果
+sox input.wav output.wav reverb                 # リバーブ効果
 ```
 
-### 2. 複数行のテキスト
-```c
-DrawText("Line 1", 10, 10, 20, BLACK);
-DrawText("Line 2", 10, 40, 20, BLACK);
-```
+## プログラム説明
 
-### 3. 動的テキスト
-```c
-DrawText("Moving Text", x + GetTime() * 60, y, 20, BLACK);
-```
+1. **app01.c**: 基本的なウィンドウ表示とテキスト描画
+2. **app02.c**: 基本図形（四角形、円、三角形）の描画
+3. **app03.c**: 単純なアニメーション（移動する円）
+4. **app04.c**: キーボード入力によるオブジェクト操作
+5. **app05.c**: マウス入力とインタラクション
+6. **app06.c**: 矩形の衝突判定
+7. **app07.c**: 画像テクスチャの読み込みと表示
+8. **app08.c**: サウンド再生の基本
+9. **app09.c**: シンプルなパーティクルシステム
+10. **app10.c**: Pongゲーム（プレイヤーvsCPU）
 
-## 注意点
-- テキストの位置は画面左上が原点(0,0)
-- フォントサイズは整数値で指定
-- カラー定数(BLACK, WHITE, RED等)が利用可能
-- マルチバイト文字使用時は文字エンコーディングに注意
+## Pongゲーム (app10.c) の詳細
 
-## 参考リンク
-- [Raylib公式ドキュメント](https://www.raylib.com/cheatsheet/cheatsheet.html)
-- [Homebrew公式サイト](https://brew.sh/)
+主な機能:
+- プレイヤーパドル（右側、青）: 上下キーで操作
+- CPUパドル（左側、緑）: ボールを追跡する簡単なAI
+- スコアシステム: パドルでボールを跳ね返すとスコア加算
+- 自動リセット: ボールが画面外に出ると中央に戻る
+
+ゲームの目的:
+- CPUとのラリーを続け、高スコアを目指す
+- ボールを取り逃がすとスコアがリセット
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。
