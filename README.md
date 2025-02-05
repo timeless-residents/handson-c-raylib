@@ -82,6 +82,11 @@ export PATH="/opt/homebrew/bin:/usr/bin:$PATH"
 clang main.c -o text_app -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
 ```
 
+```bash
+clang prototype/app01.c -o output/app01 -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+clang prototype/appXX.c -o output/appXX -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib
+```
+
 ### 3. Terminal.appのアーキテクチャ設定
 Intel MacからApple Siliconに移行した場合:
 1. Terminal.appを終了
