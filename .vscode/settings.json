@@ -1,0 +1,6 @@
+{
+    "makefile.loggingLevel": "Silent",
+    "makefile.configureOnOpen": false,
+    "makefile.configureOnEdit": false,
+    "makefile.configureAfterCommand": false
+}
